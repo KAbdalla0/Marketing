@@ -1,0 +1,40 @@
+import csv
+import requests
+import random
+import time
+
+# Replace ACCESS_TOKEN with a valid access token
+ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN'
+
+# Replace CSV_FILE_PATH with the path to the CSV file
+CSV_FILE_PATH = 'path/to/your/csv/file.csv'
+
+# List of support comments
+comments = ['Keep up the good work!', 'You are doing a great job!', 'We appreciate your efforts!', 'We are proud of you!', 'Keep it up!', 'You are an inspiration!', 'We are behind you!', 'You are making a difference!', 'We are proud to support you!', 'You are making a positive impact!']
+
+# Read the CSV file
+with open(CSV_FILE_PATH, newline='') as csv_file:
+    reader = csv.reader(csv_file)
+    for row in reader:
+        page_id = row[0]
+        # Get the last post on the page
+        post_url = f'https://graph.facebook.com/{page_id}/feed?limit=1&access_token={ACCESS_TOKEN}'
+        post_response = requests.get(post_url)
+        post_data = post_response.json()
+        last_post_id = post_data['data'][0]['id']
+        # Like the last post on the page
+        like_url = f'https://graph.facebook.com/{last_post_id}/likes'
+        like_response = requests.post(like_url, data={'access_token': ACCESS_TOKEN})
+        print(like_response.json())
+        
+        # Add 10 comments similar to "Keep up the good work"
+        for i in range(10):
+            comment_url = f'https://graph.facebook.com/{last_post_id}/comments'
+            comment_response = requests.post(comment_url, data={
+                'access_token': ACCESS_TOKEN,
+                'message': random.choice(comments)
+            })
+            print(comment_response.json())
+            
+            # Add a buffer time to prevent timing out
+            time.sleep(5)
